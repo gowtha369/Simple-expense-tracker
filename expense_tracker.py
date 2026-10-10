@@ -1,6 +1,15 @@
+import csv
 from decimal import Decimal, InvalidOperation
+from pathlib import Path
 
+file_path = Path(__file__).with_name("expenses.csv")
 expenses = []
+
+# Read expenses saved earlier.
+if file_path.exists():
+    with file_path.open(newline="", encoding="utf-8") as file:
+        for name, amount in csv.reader(file):
+            expenses.append((name, Decimal(amount)))
 
 while True:
     print("\n--- My Expense Tracker ---")
@@ -19,15 +28,21 @@ while True:
 
         try:
             amount = Decimal(input("Amount in SEK: ").strip())
+
             if not amount.is_finite() or amount <= 0:
                 print("Please enter an amount greater than zero.")
                 continue
+
         except InvalidOperation:
             print("Please enter a number, like 80 or 25.50.")
             continue
 
+        # Save the new expense.
+        with file_path.open("a", newline="", encoding="utf-8") as file:
+            csv.writer(file).writerow([name, str(amount)])
+
         expenses.append((name, amount))
-        print("Expense added!")
+        print("Expense saved!")
 
     elif choice == "2":
         if not expenses:
@@ -45,5 +60,3 @@ while True:
 
     else:
         print("Please choose 1, 2, or 3.")
-
-
